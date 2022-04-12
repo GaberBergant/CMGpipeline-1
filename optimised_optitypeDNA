@@ -51,22 +51,6 @@ task BamToFastq {
     String sample_basename
     File? input_bam
   }
-
-  ##Int space_needed_gb = 10 + round(5*size([input_bam], "GB"))
-  #runtime {
-  #  memory: "64GB"
-  #  docker: "mgibio/immuno_tools-cwl:1.0.1"
-  #  #disks: "local-disk ~{space_needed_gb} SSD"
-  #  #bootDiskSizeGb: 3*space_needed_gb
-  #}
-
-  #command <<<
-  #  set -e -o pipefail
-  #  name=~{sample_basename}
-  #  echo $name
-  #  echo Running bedtools bamtofastq
-  #  /usr/bin/bedtools bamtofastq -fq  $name.fwd.fq -fq2  $name.rev.fq -i ~{input_bam}   2>/dev/null;
-  #>>>
   
   runtime {
     docker: "alesmaver/bwa_samtools_picard"
@@ -116,11 +100,11 @@ task OptitypeDnaPrepareHLA {
     
     echo Select only the mapped reads from the sam files:
     /opt/samtools/bin/samtools view -S -F 4 $name.aln.sam > $name.aln.map.sam
-    #   rm -f  $name.aln.sam
+    rm -f  $name.aln.sam
 
     echo Convert sam files to fastq files, also stored in temp dir
     cat $name.aln.map.sam | grep -v ^@ | /usr/bin/awk '{print "@"$1"\n"$10"\n+\n"$11}' > $name.hla.fastq
-    #   rm -f $name.aln.map.sam
+    rm -f $name.aln.map.sam
 
   >>>
 
