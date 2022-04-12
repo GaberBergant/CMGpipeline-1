@@ -18,7 +18,6 @@ import "./exp_hunter.wdl" as ExpansionHunter
 import "./manta/manta_workflow.wdl" as Manta
 import "./optimised_optitypeDNA" as Optitype
 import "./SMN_caller/SMN_caller.wdl" as SMN
-## import "https://raw.githubusercontent.com/AlesMaver/CMGpipeline/master/optitype/optitype_dna.wdl" as Optitype
 
 # WORKFLOW DEFINITION 
 workflow FastqToVCF {
@@ -620,9 +619,25 @@ workflow FastqToVCF {
       enrichment = enrichment,
       enrichment_bed = enrichment_bed
     }
+
+    call Conifer.CONIFER_Annotate as CONIFER_Annotate{
+    input:
+      conifer_calls_wig = Conifer.output_conifer_calls_wig,
+      
+      sample_basename = sample_basename,
+
+      HPO = HPO,
+      HPO_index = HPO_index,
+      OMIM = OMIM,
+      OMIM_index = OMIM_index,
+      gnomadConstraints = gnomadConstraints,
+      gnomadConstraints_index = gnomadConstraints_index,
+      CGD = CGD,
+      CGD_index = CGD_index
+    }    
   }
 
-  if( defined(input_manta_reference_vcfs) ){
+  if( defined(input_manta_reference_vcfs) && !defined(PrepareMaskedGenomeFasta.targetRegions_bed) ){
     call Manta.SVcalling as Manta{
     input:
       bamFile = SortSam.output_bam,
@@ -635,7 +650,29 @@ workflow FastqToVCF {
       exome = false,
       sample = sample_basename, 
 
-      input_manta_reference_vcfs = input_manta_reference_vcfs
+      input_manta_reference_vcfs = input_manta_reference_vcfs, 
+    }
+
+    call Annotation.bcftoolsAnnotate as MantaAnnotation {
+      input:
+        input_vcf = Manta.output_manta_filtered_vcf,
+        input_vcf_index = Manta.mantaVcfindex,
+
+        sample_basename=sample_basename,
+
+        HPO = HPO,
+        HPO_index = HPO_index,
+        OMIM = OMIM,
+        OMIM_index = OMIM_index,
+        gnomadConstraints = gnomadConstraints,
+        gnomadConstraints_index = gnomadConstraints_index,
+        CGD = CGD,
+        CGD_index = CGD_index,
+
+        bcftools_annotation_header = bcftools_annotation_header,
+        
+        output_filename = sample_basename + ".manta.annotated.vcf.gz",
+        docker = "dceoy/bcftools"
     }
   }
 
@@ -651,6 +688,16 @@ workflow FastqToVCF {
     }
   }
 
+  if ( defined(enrichment) ){
+    if( enrichment=="WGS1Mb" ){
+       call Qualimap.DownsampleBED as DownsampleBED {
+        input:
+           bed_file = enrichment_bed,
+           reference_fai=reference_fai
+      }
+    }
+  }
+
   # Merge per-interval GVCFs
   if( defined(enrichment_bed) || defined(PrepareMaskedGenomeFasta.targetRegions_bed) ){
     call Qualimap.DepthOfCoverage34 as DepthOfCoverage {
@@ -663,7 +710,7 @@ workflow FastqToVCF {
         reference_fai=reference_fai,
         reference_dict=reference_dict,
 
-        enrichment_bed = select_first([PrepareMaskedGenomeFasta.targetRegions_bed, enrichment_bed]),
+        enrichment_bed = select_first([PrepareMaskedGenomeFasta.targetRegions_bed, DownsampleBED.downsampled_bed_file, enrichment_bed]),
 
         refSeqFile = refSeqFile,
 
@@ -702,6 +749,17 @@ workflow FastqToVCF {
     }
   }
 
+  # Downsample dbSNP bed file if this is a WGS analysis
+  if ( defined(enrichment) ){
+    if( enrichment=="WGS1Mb" ){
+       call ROH.Downsample_dbSNP as Downsample_dbSNP {
+        input:
+          dbSNPcommon_bed = dbSNPcommon_bed,
+          dbSNPcommon_bed_index = dbSNPcommon_bed_index
+      }
+    }
+  }
+
   call ROH.calculateBAF as calculateBAF {
   input:
     input_bam = SortSam.output_bam,
@@ -710,8 +768,8 @@ workflow FastqToVCF {
 
     reference_fa=reference_fa,
 
-    dbSNPcommon_bed = dbSNPcommon_bed,
-    dbSNPcommon_bed_index = dbSNPcommon_bed_index,
+    dbSNPcommon_bed = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed, dbSNPcommon_bed]),
+    dbSNPcommon_bed_index = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed_index, dbSNPcommon_bed_index]),
 
     docker = "alesmaver/bwa_samtools_picard"
   }
@@ -724,8 +782,8 @@ workflow FastqToVCF {
   
     reference_fa=reference_fa,
   
-    dbSNPcommon_bed = dbSNPcommon_bed,
-    dbSNPcommon_bed_index = dbSNPcommon_bed_index,
+    dbSNPcommon_bed = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed, dbSNPcommon_bed]),
+    dbSNPcommon_bed_index = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed_index, dbSNPcommon_bed_index]),
   
     gnomAD_maf01_vcf = gnomAD_maf01_vcf,
     gnomAD_maf01_vcf_index = gnomAD_maf01_vcf_index,
@@ -734,6 +792,13 @@ workflow FastqToVCF {
     gnomAD_maf01_tab_index = gnomAD_maf01_tab_index,
   
     docker = bcftools_docker
+  }
+
+  call Manta.annotSV as ROH_annotSV {
+      input:
+        genome_build = "GRCh37",
+        input_vcf = CallROH.ROH_calls_annotSV_input_bed,
+        output_tsv_name = sample_basename + ".ROH.annotSV.tsv"
   }
 
   call ExpansionHunter.ExpansionHunter as ExpansionHunter {
@@ -776,10 +841,13 @@ workflow FastqToVCF {
     File? output_conifer_calls_wig = Conifer.output_conifer_calls_wig
     #File CNV_bed = Conifer.CNV_bed
     File? CNV_wig = Conifer.CNV_wig
+    File? conifer_calls_annotated = CONIFER_Annotate.conifer_calls_annotated
+    File? conifer_annotSV_tsv = Conifer.annotSV_tsv
 
     File? mantaVCF = Manta.mantaVcf
     File? mantaVCFindex = Manta.mantaVcfindex
     File? mantaSVs = Manta.output_sv_table
+    File? mantaSVs_annotSV_tsv = Manta.annotSV_tsv
 
     File? Qualimap_results = Qualimap.results
     File? QualimapWGS_results = QualimapWGS.results
@@ -792,6 +860,7 @@ workflow FastqToVCF {
     File ROH_calls_size = CallROH.ROH_calls_size
     File ROH_intervals_state = CallROH.ROH_intervals_state
     File ROH_intervals_qual = CallROH.ROH_intervals_qual
+    File? ROH_annotSV_tsv = ROH_annotSV.sv_variants_tsv
     #File ROHplink_calls = CallPlink.ROHplink_calls
 
     File? mitoResults_xls = MitoMap.mitoResults_xls
