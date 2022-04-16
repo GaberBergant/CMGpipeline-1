@@ -243,7 +243,7 @@ workflow FastqToVCF {
       compression_level = 2
   }
 
-  if ( defined(targetRegions) and select_first([perform_masked_alignment, false]) ) {
+  if ( defined(targetRegions) && select_first([perform_masked_alignment, false]) ) {
     call PrepareMaskedGenomeFasta {
       input:
         reference_fixed_fa=reference_fixed_fa,
