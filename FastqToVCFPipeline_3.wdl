@@ -444,7 +444,7 @@ workflow FastqToVCF {
           tumor_reads = GatherSortedBamFiles.output_bam,
           tumor_reads_index = GatherSortedBamFiles.output_bam_index, 
           gatk_docker = gatk_docker,
-          gatk_override = gatk_path
+          gatk_override = "/gatk/gatk.jar"
     }
   }
 
