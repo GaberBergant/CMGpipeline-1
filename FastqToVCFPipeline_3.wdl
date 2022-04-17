@@ -1906,7 +1906,7 @@ task StringToArray {
     String separator
   }
   command <<<
-    echo '~{input_string}' | tr ~{separator} \\n | tr -d "[:blank:]"
+    echo '~{input_string}' | tr '~{separator}' \\n | tr -d "[:blank:]"
   >>>
   runtime {
     docker:"biocontainers/bcftools:v1.9-1-deb_cv1"
