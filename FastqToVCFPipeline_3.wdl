@@ -425,10 +425,10 @@ workflow FastqToVCF {
      }
   }
 
-  if( !defined(targetRegions) ) {
+  if( defined(targetRegions) ) {
     call StringToArray {
       input:
-        input_string = targetRegions,
+        input_string = select_first([targetRegions, ""]),
         separator = ";"
     }
   }
