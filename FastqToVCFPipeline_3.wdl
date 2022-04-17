@@ -441,6 +441,7 @@ workflow FastqToVCF {
           ref_fai = reference_fai,
           ref_dict = reference_dict, 
           scatter_count = 40,
+          intervals = StringToArray.intervals_list,
           tumor_reads = GatherSortedBamFiles.output_bam,
           tumor_reads_index = GatherSortedBamFiles.output_bam_index, 
           gatk_docker = "broadinstitute/gatk:4.0.11.0"
@@ -1920,6 +1921,7 @@ task StringToArray {
     String separator
   }
   command <<<
+    echo '~{input_string}' | tr '~{separator}' \\n | tr -d "[:blank:]" > intervals.list
     echo '~{input_string}' | tr '~{separator}' \\n | tr -d "[:blank:]"
   >>>
   runtime {
@@ -1930,6 +1932,7 @@ task StringToArray {
   }
   output {
     Array[String] values = read_lines(stdout())
+    File intervals_list = "intervals.list"
   }
 }
 
