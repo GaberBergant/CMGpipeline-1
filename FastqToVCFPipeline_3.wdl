@@ -424,8 +424,16 @@ workflow FastqToVCF {
        sample_basename=sample_basename
      }
   }
-  
-  scatter (chromosome in chromosomes) {
+
+  if( !defined(targetRegions) ) {
+    call StringToArray {
+      input:
+        input_string = targetRegions,
+        separator = ";"
+    }
+  }
+
+  scatter (chromosome in select_first([StringToArray.values, chromosomes]) ) {
     call HaplotypeCaller {
       input:
         input_bam = GatherSortedBamFiles.output_bam,
@@ -1892,6 +1900,23 @@ task ConvertToCram {
   }
 }
 
-
+task StringToArray {
+  input {
+    String input_string
+    String separator
+  }
+  command <<<
+    echo '~{ref_fasta}' | tr ~{separator} \\n | tr -d "[:blank:]"
+  >>>
+  runtime {
+    docker:"biocontainers/bcftools:v1.9-1-deb_cv1"
+    requested_memory_mb_per_core: 500
+    cpu: 1
+    runtime_minutes: 5
+  }
+  output {
+    Array[String] values = read_lines(stdout())
+  }
+}
 
 
