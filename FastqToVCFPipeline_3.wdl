@@ -796,13 +796,13 @@ workflow FastqToVCF {
     
       docker = bcftools_docker
     }
-  }
 
-  call Manta.annotSV as ROH_annotSV {
-      input:
-        genome_build = "GRCh37",
-        input_vcf = CallROH.ROH_calls_annotSV_input_bed,
-        output_tsv_name = sample_basename + ".ROH.annotSV.tsv"
+    call Manta.annotSV as ROH_annotSV {
+        input:
+          genome_build = "GRCh37",
+          input_vcf = CallROH.ROH_calls_annotSV_input_bed,
+          output_tsv_name = sample_basename + ".ROH.annotSV.tsv"
+    }
   }
 
   call ExpansionHunter.ExpansionHunter as ExpansionHunter {
