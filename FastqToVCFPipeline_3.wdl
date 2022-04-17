@@ -800,7 +800,7 @@ workflow FastqToVCF {
     call Manta.annotSV as ROH_annotSV {
         input:
           genome_build = "GRCh37",
-          input_vcf = CallROH.ROH_calls_annotSV_input_bed,
+          input_vcf = select_first([CallROH.ROH_calls_annotSV_input_bed, None]),
           output_tsv_name = sample_basename + ".ROH.annotSV.tsv"
     }
   }
