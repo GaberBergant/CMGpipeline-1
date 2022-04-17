@@ -762,7 +762,7 @@ workflow FastqToVCF {
   }
 
   # Do not perform ROH calling if target regions are defined - this means targeted sequencing
-  if ( !defined(targetRegions) ){
+  #if ( !defined(targetRegions) ){
     call ROH.calculateBAF as calculateBAF {
     input:
       input_bam = SortSam.output_bam,
@@ -803,7 +803,7 @@ workflow FastqToVCF {
           input_vcf = select_first([CallROH.ROH_calls_annotSV_input_bed, ""]),
           output_tsv_name = sample_basename + ".ROH.annotSV.tsv"
     }
-  }
+  #}
 
   call ExpansionHunter.ExpansionHunter as ExpansionHunter {
     input:
