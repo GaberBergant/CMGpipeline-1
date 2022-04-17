@@ -761,38 +761,41 @@ workflow FastqToVCF {
     }
   }
 
-  call ROH.calculateBAF as calculateBAF {
-  input:
-    input_bam = SortSam.output_bam,
-    input_bam_index = SortSam.output_bam_index,
-    sample_basename=sample_basename,
+  # Do not perform ROH calling if target regions are defined - this means targeted sequencing
+  if ( !defined(targetRegions) ){
+    call ROH.calculateBAF as calculateBAF {
+    input:
+      input_bam = SortSam.output_bam,
+      input_bam_index = SortSam.output_bam_index,
+      sample_basename=sample_basename,
 
-    reference_fa=reference_fa,
+      reference_fa=reference_fa,
 
-    dbSNPcommon_bed = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed, dbSNPcommon_bed]),
-    dbSNPcommon_bed_index = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed_index, dbSNPcommon_bed_index]),
+      dbSNPcommon_bed = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed, dbSNPcommon_bed]),
+      dbSNPcommon_bed_index = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed_index, dbSNPcommon_bed_index]),
 
-    docker = "alesmaver/bwa_samtools_picard"
-  }
+      docker = "alesmaver/bwa_samtools_picard"
+    }
 
-  call ROH.CallROH as CallROH {
-  input:
-    input_bam = SortSam.output_bam,
-    input_bam_index = SortSam.output_bam_index,
-    sample_basename=sample_basename,
-  
-    reference_fa=reference_fa,
-  
-    dbSNPcommon_bed = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed, dbSNPcommon_bed]),
-    dbSNPcommon_bed_index = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed_index, dbSNPcommon_bed_index]),
-  
-    gnomAD_maf01_vcf = gnomAD_maf01_vcf,
-    gnomAD_maf01_vcf_index = gnomAD_maf01_vcf_index,
+    call ROH.CallROH as CallROH {
+    input:
+      input_bam = SortSam.output_bam,
+      input_bam_index = SortSam.output_bam_index,
+      sample_basename=sample_basename,
+    
+      reference_fa=reference_fa,
+    
+      dbSNPcommon_bed = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed, dbSNPcommon_bed]),
+      dbSNPcommon_bed_index = select_first([Downsample_dbSNP.downsampled_dbSNPcommon_bed_index, dbSNPcommon_bed_index]),
+    
+      gnomAD_maf01_vcf = gnomAD_maf01_vcf,
+      gnomAD_maf01_vcf_index = gnomAD_maf01_vcf_index,
 
-    gnomAD_maf01_tab = gnomAD_maf01_tab,
-    gnomAD_maf01_tab_index = gnomAD_maf01_tab_index,
-  
-    docker = bcftools_docker
+      gnomAD_maf01_tab = gnomAD_maf01_tab,
+      gnomAD_maf01_tab_index = gnomAD_maf01_tab_index,
+    
+      docker = bcftools_docker
+    }
   }
 
   call Manta.annotSV as ROH_annotSV {
@@ -856,11 +859,11 @@ workflow FastqToVCF {
     File? DepthOfCoverage_output = DepthOfCoverage.DepthOfCoverage_output
     File? DepthOfCoverageWGS_output = DepthOfCoverageWGS.DepthOfCoverage_output
 
-    File output_BAF = calculateBAF.output_BAF
-    File ROH_calls_qual = CallROH.ROH_calls_qual
-    File ROH_calls_size = CallROH.ROH_calls_size
-    File ROH_intervals_state = CallROH.ROH_intervals_state
-    File ROH_intervals_qual = CallROH.ROH_intervals_qual
+    File? output_BAF = calculateBAF.output_BAF
+    File? ROH_calls_qual = CallROH.ROH_calls_qual
+    File? ROH_calls_size = CallROH.ROH_calls_size
+    File? ROH_intervals_state = CallROH.ROH_intervals_state
+    File? ROH_intervals_qual = CallROH.ROH_intervals_qual
     File? ROH_annotSV_tsv = ROH_annotSV.sv_variants_tsv
     #File ROHplink_calls = CallPlink.ROHplink_calls
 
