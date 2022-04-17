@@ -1,6 +1,8 @@
 version 1.0
 ## Copyright CMG@KIGM, Ales Maver
 
+import "./FastqToVCFPipeline_3.wdl" as Main
+
 # WORKFLOW DEFINITION 
 workflow AnnotateVCF {
   input {
@@ -41,6 +43,8 @@ workflow AnnotateVCF {
 
     File dbNSFP
     File dbNSFP_index
+
+    String? targetRegions
 
     #String bgzip_docker = "dockerbiotools/bcftools:latest"
     ##String bcftools_docker = "dceoy/bcftools:latest"
@@ -85,8 +89,16 @@ workflow AnnotateVCF {
       docker = bcftools_docker
   }
 
+  if( defined(targetRegions) ) {
+    call Main.StringToArray as StringToArray {
+      input:
+        input_string = select_first([targetRegions, ""]),
+        separator = ";"
+    }
+  }
+
   # Call variants in parallel over grouped calling intervals
-  scatter (chromosome in chromosomes) {
+  scatter (chromosome in select_first([StringToArray.values, chromosomes]) ) {
     call bcftoolsAnnotate {
       input:
         input_vcf = CompressAndIndexVCF1.output_vcfgz,

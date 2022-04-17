@@ -1,8 +1,8 @@
 version 1.0
 
 # Subworkflows
-import "https://raw.githubusercontent.com/AlesMaver/CMGpipeline/master/AnnotationPipeline.wdl" as Annotation
-import "https://raw.githubusercontent.com/AlesMaver/CMGpipeline/master/CreateInterpretationTable.wdl" as CreateInterpretationTable
+import "./AnnotationPipeline.wdl" as Annotation
+import "./CreateInterpretationTable.wdl" as CreateInterpretationTable
 
 workflow AnnotateAndTable {
   input {

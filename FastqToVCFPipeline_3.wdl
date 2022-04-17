@@ -595,6 +595,8 @@ workflow FastqToVCF {
       dbNSFP = dbNSFP,
       dbNSFP_index = dbNSFP_index,
 
+      targetRegions = targetRegions,
+
       #bcftools_docker = bcftools_docker,
       #SnpEff_docker = SnpEff_docker,
       gatk_docker = gatk_docker,
