@@ -440,7 +440,7 @@ workflow FastqToVCF {
           ref_fasta = reference_fa,
           ref_fai = reference_fai,
           ref_dict = reference_dict, 
-          scatter_count = 30,
+          scatter_count = 40,
           tumor_reads = GatherSortedBamFiles.output_bam,
           tumor_reads_index = GatherSortedBamFiles.output_bam_index, 
           gatk_docker = "broadinstitute/gatk:4.0.11.0"
