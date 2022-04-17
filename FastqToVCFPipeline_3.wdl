@@ -443,7 +443,8 @@ workflow FastqToVCF {
           scatter_count = 20,
           tumor_reads = GatherSortedBamFiles.output_bam,
           tumor_reads_index = GatherSortedBamFiles.output_bam_index, 
-          gatk_docker = gatk_docker
+          gatk_docker = gatk_docker,
+          gatk_override = gatk_path
     }
   }
 
