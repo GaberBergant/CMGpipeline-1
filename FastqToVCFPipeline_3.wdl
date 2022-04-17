@@ -480,8 +480,8 @@ workflow FastqToVCF {
 
   call SplitSNPindel {
   input:
-    input_vcf = MergeVCFs.output_vcf,
-    input_vcf_index = MergeVCFs.output_vcf_index,
+    input_vcf = select_first([Mutect2.filtered_vcf, MergeVCFs.output_vcf]),
+    input_vcf_index = select_first([Mutect2.filtered_vcf_idx, MergeVCFs.output_vcf_index]),
     sample_basename=sample_basename,
 
     reference_fa=reference_fa,
