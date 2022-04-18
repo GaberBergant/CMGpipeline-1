@@ -113,7 +113,7 @@ workflow AnnotateAndTable {
       dbNSFP = dbNSFP,
       dbNSFP_index = dbNSFP_index,
 
-      targetRegions = select_first([GetVariantRegions.regions, targetRegions])
+      targetRegions = select_first([GetVariantRegions.regions, targetRegions]),
 
       #bcftools_docker = bcftools_docker,
       #SnpEff_docker = SnpEff_docker,
