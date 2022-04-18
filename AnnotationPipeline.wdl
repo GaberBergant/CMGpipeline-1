@@ -1,8 +1,6 @@
 version 1.0
 ## Copyright CMG@KIGM, Ales Maver
 
-import "./FastqToVCFPipeline_3.wdl" as Main
-
 # WORKFLOW DEFINITION 
 workflow AnnotateVCF {
   input {
@@ -90,7 +88,7 @@ workflow AnnotateVCF {
   }
 
   if( defined(targetRegions) ) {
-    call Main.StringToArray as StringToArray {
+    call StringToArray {
       input:
         input_string = select_first([targetRegions, ""]),
         separator = ";"
@@ -518,3 +516,25 @@ task GenerateVariantTable {
     File output_table = " ~{sample_basename}.tab"
   }
 }
+
+task StringToArray {
+  input {
+    String input_string
+    String separator
+  }
+  command <<<
+    echo '~{input_string}' | tr '~{separator}' \\n | tr -d "[:blank:]" > intervals.list
+    echo '~{input_string}' | tr '~{separator}' \\n | tr -d "[:blank:]"
+  >>>
+  runtime {
+    docker:"biocontainers/bcftools:v1.9-1-deb_cv1"
+    requested_memory_mb_per_core: 500
+    cpu: 1
+    runtime_minutes: 5
+  }
+  output {
+    Array[String] values = read_lines(stdout())
+    File intervals_list = "intervals.list"
+  }
+}
+
