@@ -43,7 +43,7 @@ workflow FastqToVCF {
 
     String? targetRegions
     Boolean? perform_masked_alignment
-    Boolean call_somatic_variants = False
+    Boolean call_somatic_variants = false
 
     Int bwa_threads
     Int threads
