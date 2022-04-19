@@ -446,7 +446,7 @@ workflow FastqToVCF {
           tumor_reads = GatherSortedBamFiles.output_bam,
           tumor_reads_index = GatherSortedBamFiles.output_bam_index,
           make_bamout = true, 
-          m2_extra_args = " --f1r2-median-mq 0 --disable-read-filter ",
+          m2_extra_args = " --f1r2-median-mq 0 --disable-tool-default-read-filters ",
           gatk_docker = gatk_docker
     }
   }
