@@ -256,8 +256,6 @@ workflow FastqToVCF {
         docker = "pegi3s/bedtools"
     }
 
-    #String enrichment_bed = PrepareMaskedGenomeFasta.targetRegions_bed
-
     call PrepareMaskedBWAIndex {
       input:
         reference_masked_fa=PrepareMaskedGenomeFasta.reference_masked_fa,
@@ -667,7 +665,7 @@ workflow FastqToVCF {
     }    
   }
 
-  if( defined(input_manta_reference_vcfs) && !defined(PrepareMaskedGenomeFasta.targetRegions_bed) ){
+  if( defined(input_manta_reference_vcfs) && !defined(targetRegions) ){
     call Manta.SVcalling as Manta{
     input:
       bamFile = SortSam.output_bam,
@@ -706,13 +704,24 @@ workflow FastqToVCF {
     }
   }
 
-  if( defined(enrichment_bed) || defined(PrepareMaskedGenomeFasta.targetRegions_bed) ){
+  if ( defined(targetRegions) ){
+    call RegionsToBed {
+      input:
+        targetRegions=select_first([targetRegions,""]),
+
+        # Runtime 
+        docker = "pegi3s/bedtools"
+
+    }
+  }
+
+  if( defined(enrichment_bed) || defined(PrepareMaskedGenomeFasta.targetRegions_bed) || defined(RegionsToBed.targetRegions_bed) ){
     call Qualimap.bamqc as Qualimap {
     input:
       bam = SortSam.output_bam,
       sample_basename=sample_basename,
       
-      enrichment_bed = select_first([PrepareMaskedGenomeFasta.targetRegions_bed, enrichment_bed]),
+      enrichment_bed = select_first([PrepareMaskedGenomeFasta.targetRegions_bed, RegionsToBed.targetRegions_bed, enrichment_bed]),
 
       ncpu = 8
     }
@@ -728,8 +737,8 @@ workflow FastqToVCF {
     }
   }
 
-  # Merge per-interval GVCFs
-  if( defined(enrichment_bed) || defined(PrepareMaskedGenomeFasta.targetRegions_bed) ){
+  # Depth of coverage
+  if( defined(enrichment_bed) || defined(PrepareMaskedGenomeFasta.targetRegions_bed) || defined(RegionsToBed.targetRegions_bed) ){
     call Qualimap.DepthOfCoverage34 as DepthOfCoverage {
       input:
         input_bam = SortSam.output_bam,
@@ -740,7 +749,7 @@ workflow FastqToVCF {
         reference_fai=reference_fai,
         reference_dict=reference_dict,
 
-        enrichment_bed = select_first([PrepareMaskedGenomeFasta.targetRegions_bed, DownsampleBED.downsampled_bed_file, enrichment_bed]),
+        enrichment_bed = select_first([PrepareMaskedGenomeFasta.targetRegions_bed, RegionsToBed.targetRegions_bed, DownsampleBED.downsampled_bed_file, enrichment_bed]),
 
         refSeqFile = refSeqFile,
 
@@ -751,7 +760,7 @@ workflow FastqToVCF {
   }
   
   # Calculate WGS coverage if neither enrichment_bed nor target regions parameter is defined
-  if( !defined(enrichment_bed) && !defined(PrepareMaskedGenomeFasta.targetRegions_bed) ){
+  if( !defined(enrichment_bed) && !defined(PrepareMaskedGenomeFasta.targetRegions_bed) && !defined(RegionsToBed.targetRegions_bed) ){
   
     call Qualimap.bamqc as QualimapWGS {
       input:
@@ -791,6 +800,7 @@ workflow FastqToVCF {
   }
 
   # Do not perform ROH calling if target regions are defined - this means targeted sequencing
+  # Currently ROHs are left on because they do not disrupt the WF and they generate the files, even if empty, and make it easier for copying, etc
   #if ( !defined(targetRegions) ){
     call ROH.calculateBAF as calculateBAF {
     input:
@@ -964,6 +974,32 @@ task CutAdapters {
   }
   output {
     File output_fq_trimmed = "~{sample_basename}.trimmed.fq.gz"
+  }
+}
+
+task RegionsToBed {
+  input {
+    # Command parameters
+    String? targetRegions # FORMAT "chr1:123033-130000;chrX:1-1000"
+
+    # Runtime parameters
+    String docker
+  }
+  
+  command <<<
+    set -e
+
+    echo "~{targetRegions}"  | tr ';' '\n' | tr ':' '\t' | tr '-' '\t' > targetRegions.bed
+  >>>
+
+  runtime {
+    docker: docker
+    requested_memory_mb_per_core: 500
+    cpu: 1
+    runtime_minutes: 10
+  }
+  output {
+    File targetRegions_bed = "targetRegions.bed"
   }
 }
 
