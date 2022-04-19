@@ -444,7 +444,8 @@ workflow FastqToVCF {
           scatter_count = 1,
           intervals = StringToArray.intervals_list,
           tumor_reads = GatherSortedBamFiles.output_bam,
-          tumor_reads_index = GatherSortedBamFiles.output_bam_index, 
+          tumor_reads_index = GatherSortedBamFiles.output_bam_index,
+          make_bamout = true, 
           gatk_docker = gatk_docker
     }
   }
