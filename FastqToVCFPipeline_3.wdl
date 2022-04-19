@@ -43,6 +43,7 @@ workflow FastqToVCF {
 
     String? targetRegions
     Boolean? perform_masked_alignment
+    Boolean? call_somatic_variants
 
     Int bwa_threads
     Int threads
@@ -434,7 +435,7 @@ workflow FastqToVCF {
     }
   }
 
-  if( defined(targetRegions) ) {
+  if( defined(targetRegions) && select_first([call_somatic_variants, False]) ) {
     call Mutect2.Mutect2 {
         input:
           ref_fasta = reference_fa,
