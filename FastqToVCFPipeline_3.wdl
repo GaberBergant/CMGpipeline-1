@@ -446,7 +446,8 @@ workflow FastqToVCF {
           tumor_reads = GatherSortedBamFiles.output_bam,
           tumor_reads_index = GatherSortedBamFiles.output_bam_index,
           make_bamout = true, 
-          m2_extra_args = " --f1r2-median-mq 10 ",
+          # We mostly use Mutect2 for detection using PCR-based approaches, therefore disabling NotDuplicateReadFilter for testing purposes
+          m2_extra_args = " --disable-read-filter NotDuplicateReadFilter ",
           gatk_docker = gatk_docker
     }
   }
