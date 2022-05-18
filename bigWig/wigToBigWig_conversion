@@ -1,23 +1,32 @@
 version 1.0
 
+# wigToBigWig conversion
+# The input files are the reference fast index file and an array of wig files, we would like to convert
 
 task wigToBigWig {
   input {
     Array[File] wig_files
     File ref_fasta_index
   }
+  
+  runtime {
+    docker: "abralab/wigtobigwig:v4"
+    requested_memory_mb_per_core: 8000
+    cpu: 2
+    runtime_minutes: 700
+  }
+  
   command <<<
     # set -exo pipefail
     set -e
     
     # make chrom_sizes file from 
-    # cut -f1,2 /mnt/dataSeq/CROMWELL/FastqToVCFPipelineDatasets/hg19/hg19.fa.fai > chrom_sizes.txt
     cut -f1,2 ~{ref_fasta_index} > chrom_sizes.txt
 
     for x in ~{sep=' ' wig_files}
     do
-        # sort -m -k1,1 -k2,2n "${x}" > $(basename "${x}" .bed).sorted.bed
-        wigToBigWig "${x}" chrom_sizes.txt $(basename "${x}" .wig).bw
+        echo "${x}" to $(basename "${x}" .wig).bw
+        # wigToBigWig "${x}" chrom_sizes.txt $(basename "${x}" .wig).bw
     done;
    >>>
  output {
