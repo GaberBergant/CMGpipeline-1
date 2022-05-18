@@ -29,10 +29,11 @@ task wigToBigWig {
         echo "${x}" to $(basename "${x}" .wig).bw
         # wigToBigWig "${x}" chrom_sizes.txt $(basename "${x}" .wig).bw
     done;
-   >>>
- output {
-   Array[File] bigWig_files = glob("*.bw")
- }
+  >>>
+   
+  output {
+    Array[File] bigWig_files = glob("*.bw")
+  }
 }
 
 workflow wigToBigWig_wf {
