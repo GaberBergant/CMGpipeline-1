@@ -20,7 +20,8 @@ task wigToBigWig {
     # set -exo pipefail
     set -e
     
-    # make chrom_sizes file from 
+    echo Reference fasta index file  ~{ref_fasta_index}
+    # make chrom_sizes file from reference fasta index file
     cut -f1,2 ~{ref_fasta_index} > chrom_sizes.txt
 
     for x in ~{sep=' ' wig_files}
