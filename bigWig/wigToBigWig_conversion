@@ -37,6 +37,8 @@ task wigToBigWig {
    
   output {
     Array[File] bigWig_files = glob("*.bw")
+    #### Array[File] bigWig_files = ["./qc/fastqc_zip/${fwdName}_fastqc.zip", "./qc/fastqc_zip/${revName}_fastqc.zip"]
+    #### select_all([baf_wig, cnv_wig, cnv_genome_wig, roh_calls_qual_wig, coverage_neg_wig, coverage_wig, coverage_mean_wig])
   }
 }
 
