@@ -20,11 +20,9 @@ task wigToBigWig {
     # set -exo pipefail
     # set -e
     
-    echo ~{ref_fasta_index}
-    echo ~{sep=' ' wig_files}
-
+    # echo ~{ref_fasta_index}
     
-    # make chrom_sizes file from reference fasta index file
+    echo "Making chrom_sizes file from reference fasta index file"
     cut -f1,2 ~{ref_fasta_index} > chrom_sizes.txt
     echo "chrome sizes:"
     cat chrom_sizes.txt
@@ -33,9 +31,8 @@ task wigToBigWig {
     for x in ~{sep=' ' wig_files}
     do
         echo "${x}" to $(basename "${x}" .wig).bw
-        touch $(basename "${x}" .wig).bw
-        
-        # wigToBigWig "${x}" chrom_sizes.txt $(basename "${x}" .wig).bw
+        ## touch $(basename "${x}" .wig).bw
+        wigToBigWig "${x}" chrom_sizes.txt $(basename "${x}" .wig).bw
     done;
       
   >>>
