@@ -62,6 +62,7 @@ workflow wigToBigWig_wf {
   Array[File] wig_files = select_all([baf_wig, cnv_wig, cnv_genome_wig, roh_calls_qual_wig, coverage_neg_wig, coverage_wig, coverage_mean_wig])
   call wigToBigWig {
     input:
+      sample_basename=sample_basename,
       wig_files=wig_files,
       ref_fasta_index=ref_fasta_index
       
