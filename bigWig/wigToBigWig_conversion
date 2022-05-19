@@ -5,7 +5,7 @@ version 1.0
 
 task wigToBigWig {
   input {
-    String sample_basename
+    # String sample_basename
     Array[File] wig_files
     File ref_fasta_index
   }
@@ -20,10 +20,7 @@ task wigToBigWig {
   command <<<
     # set -exo pipefail
     # set -e
-    
-    echo  ~{sample_basename}
-    # echo ~{ref_fasta_index}
-    
+       
     echo "Making chrom_sizes file from reference fasta index file"
     cut -f1,2 ~{ref_fasta_index} > chrom_sizes.txt
     
@@ -38,16 +35,16 @@ task wigToBigWig {
   >>>
    
   output {
-    ## Array[File] bigWig_files = glob("*.bw")
-    Array[File] bigWig_files = select_all(["~{sample_basename}.BAF.bw", "~{sample_basename}.ROHcalls.qual.bw", "~{sample_basename}.CNV.bw", "~{sample_basename}.CNV.genome.bw",
-                                "~{sample_basename}.coverage_neg.bw", "~{sample_basename}.coverage.bw", "~{sample_basename}.coverage_mean.bw"])
+    Array[File] bigWig_files = glob("*.bw")
+    ### Array[File?] bigWig_files = select_all(["~{sample_basename}.BAF.bw", "~{sample_basename}.ROHcalls.qual.bw", "~{sample_basename}.CNV.bw", "~{sample_basename}.CNV.genome.bw",
+    ###                            "~{sample_basename}.coverage_neg.bw", "~{sample_basename}.coverage.bw", "~{sample_basename}.coverage_mean.bw"])
     
   }
 }
 
 workflow wigToBigWig_wf {
   input {
-    String sample_basename
+    # String sample_basename
     # Array[File] wig_files
     File  ref_fasta_index
     File? baf_wig
@@ -62,7 +59,7 @@ workflow wigToBigWig_wf {
   Array[File] wig_files = select_all([baf_wig, cnv_wig, cnv_genome_wig, roh_calls_qual_wig, coverage_neg_wig, coverage_wig, coverage_mean_wig])
   call wigToBigWig {
     input:
-      sample_basename=sample_basename,
+      # sample_basename=sample_basename,
       wig_files=wig_files,
       ref_fasta_index=ref_fasta_index
       
