@@ -20,7 +20,9 @@ task wigToBigWig {
     # set -exo pipefail
     set -e
     
+    echo Wig files ~{wig_files}
     echo Reference fasta index file  ~{ref_fasta_index}
+    
     # make chrom_sizes file from reference fasta index file
     cut -f1,2 ~{ref_fasta_index} > chrom_sizes.txt
 
@@ -38,13 +40,19 @@ task wigToBigWig {
 
 workflow wigToBigWig_wf {
   input {
-    Array[File] wig_files
-    File ref_fasta_index
+    # Array[File] wig_files
+    File  ref_fasta_index
+    File? baf_wig
+    File? cnv_genome_wig
+    File? cnv_wig
+    
   }
+  Array[File] wig_files = select_all([baf_wig, cnv_wig, cnv_genome_wig])
   call wigToBigWig {
     input:
       wig_files=wig_files,
       ref_fasta_index=ref_fasta_index
+      
   }
   # output {
   #   Array[File] sorted_bed = sort_bed.sorted_bed
