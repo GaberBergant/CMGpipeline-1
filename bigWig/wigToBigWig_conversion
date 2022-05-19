@@ -39,8 +39,8 @@ task wigToBigWig {
    
   output {
     ## Array[File] bigWig_files = glob("*.bw")
-    Array[File] bigWig_files = ["~{sample_basename}.BAF.bw", "~{sample_basename}.ROHcalls.qual.bw", "~{sample_basename}.CNV.bw", "~{sample_basename}.CNV.genome.bw",
-                                "~{sample_basename}.coverage_neg.bw", "~{sample_basename}.coverage.bw", "~{sample_basename}.coverage_mean.bw"]  
+    Array[File] bigWig_files = select_all(["~{sample_basename}.BAF.bw", "~{sample_basename}.ROHcalls.qual.bw", "~{sample_basename}.CNV.bw", "~{sample_basename}.CNV.genome.bw",
+                                "~{sample_basename}.coverage_neg.bw", "~{sample_basename}.coverage.bw", "~{sample_basename}.coverage_mean.bw"])
     
   }
 }
