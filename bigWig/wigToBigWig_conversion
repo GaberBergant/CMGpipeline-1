@@ -21,7 +21,7 @@ task wigToBigWig {
     # set -e
     
     echo ~{ref_fasta_index}
-    echo ~{sep='\n' wig_files}
+    echo ~{sep=' ' wig_files}
 
     
     # make chrom_sizes file from reference fasta index file
