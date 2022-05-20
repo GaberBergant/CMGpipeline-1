@@ -861,6 +861,18 @@ workflow FastqToVCF {
   #
   #  docker = "asherkhb/plink"
   #}
+  
+  call BigWig.wigToBigWigConversion as BigWig {
+  input {
+    ref_fasta_index = reference_fai,
+    baf_wig = calculateBAF.output_BAF,
+    roh_calls_qual_wig = CallROH.ROH_calls_qual,
+    cnv_genome_wig = Conifer.CNV_wig,
+    cnv_wig = Conifer.output_conifer_calls_wig,
+    coverage_neg_wig = DepthOfCoverage.coverage_neg_wig,
+    coverage_wig = DepthOfCoverage.coverage_wig,
+    coverage_mean_wig = DepthOfCoverage.coverage_mean_wig
+  }
 
   output {
     File output_bam = SortSam.output_bam
@@ -918,6 +930,8 @@ workflow FastqToVCF {
     File? output_pdf = SMN_caller.output_pdf
 
     File? expansion_hunter_vcf_annotated = ExpansionHunter.expansion_hunter_vcf_annotated
+    
+    ### Array[File]? bigWig_files = wigToBigWig.bigWig_files
   }
 }
 
