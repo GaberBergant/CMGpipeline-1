@@ -42,7 +42,7 @@ task wigToBigWig {
   }
 }
 
-workflow wigToBigWig_wf {
+workflow wigToBigWigConversion {
   input {
     # String sample_basename
     # Array[File] wig_files
