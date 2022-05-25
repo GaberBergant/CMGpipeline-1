@@ -863,7 +863,7 @@ workflow FastqToVCF {
   #}
   
   call BigWig.wigToBigWigConversion as BigWig {
-  input {
+  input: {
     ref_fasta_index = reference_fai,
     baf_wig = calculateBAF.output_BAF,
     roh_calls_qual_wig = CallROH.ROH_calls_qual,
