@@ -931,7 +931,7 @@ workflow FastqToVCF {
 
     File? expansion_hunter_vcf_annotated = ExpansionHunter.expansion_hunter_vcf_annotated
     
-    Array[File] bigWig_files = wigToBigWigConversion.bigWig_files
+    Array[File] bigWig_files = BigWig.bigWig_files
   }
 }
 
