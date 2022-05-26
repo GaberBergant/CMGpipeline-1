@@ -33,7 +33,7 @@ task wigToBigWig {
         ## touch $(basename "${x}" .wig).bw
         wigToBigWig "${x}" chrom_sizes.txt $(basename "${x}" .wig).bw
     done;
-    tar -czf ~{out_bigwig_tar_file} *.bw
+    tar -czvf ~{out_bigwig_tar_file} *.bw
     echo "Done."  
   >>>
    
