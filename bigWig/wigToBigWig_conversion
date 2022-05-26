@@ -34,7 +34,8 @@ task wigToBigWig {
         wigToBigWig "${x}" chrom_sizes.txt $(basename "${x}" .wig).bw
     done;
     echo "Tar&zip..."
-    tar -czvf ~{out_bigwig_tar_file} *.bw
+    #tar -czvf ~{out_bigwig_tar_file} *.bw 
+    tar --create --gzip --verbose --group=cmg --owner=cmg --file=~{out_bigwig_tar_file} *.bw
     echo "Done."  
   >>>
    
