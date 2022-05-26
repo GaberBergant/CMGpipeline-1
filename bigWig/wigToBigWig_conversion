@@ -5,11 +5,13 @@ version 1.0
 
 task wigToBigWig {
   input {
-    # String sample_basename
+    String sample_basename
     Array[File] wig_files
     File ref_fasta_index
   }
   
+  String out_bigwig_tar_file = sample_basename + ".bigwig.tar.gz"
+    
   runtime {
     docker: "abralab/wigtobigwig:v4"
     requested_memory_mb_per_core: 8000
@@ -31,21 +33,19 @@ task wigToBigWig {
         ## touch $(basename "${x}" .wig).bw
         wigToBigWig "${x}" chrom_sizes.txt $(basename "${x}" .wig).bw
     done;
+    tar -czf ~{out_bigwig_tar_file} *.bw
     echo "Done."  
   >>>
    
   output {
-    Array[File] bigWig_files = glob("*.bw")
-    ### Array[File?] bigWig_files = select_all(["~{sample_basename}.BAF.bw", "~{sample_basename}.ROHcalls.qual.bw", "~{sample_basename}.CNV.bw", "~{sample_basename}.CNV.genome.bw",
-    ###                            "~{sample_basename}.coverage_neg.bw", "~{sample_basename}.coverage.bw", "~{sample_basename}.coverage_mean.bw"])
-    
+    ## Array[File] bigWig_files = glob("*.bw")  
+    File? bigWig_tar_file = out_bigwig_tar_file
   }
 }
 
 workflow wigToBigWigConversion {
   input {
-    # String sample_basename
-    # Array[File] wig_files
+    String sample_basename
     File  ref_fasta_index
     File? baf_wig
     File? roh_calls_qual_wig
@@ -59,12 +59,13 @@ workflow wigToBigWigConversion {
   Array[File] wig_files = select_all([baf_wig, cnv_wig, cnv_genome_wig, roh_calls_qual_wig, coverage_neg_wig, coverage_wig, coverage_mean_wig])
   call wigToBigWig {
     input:
-      # sample_basename=sample_basename,
+      sample_basename=sample_basename,
       wig_files=wig_files,
       ref_fasta_index=ref_fasta_index
       
   }
   output {
-    Array[File] bigWig_files = wigToBigWig.bigWig_files
+    ## Array[File] bigWig_files = wigToBigWig.bigWig_files
+    File? bigWig_tar_file = wigToBigWig.bigWig_tar_file
   }
 }
