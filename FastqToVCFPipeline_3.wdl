@@ -864,6 +864,7 @@ workflow FastqToVCF {
   
   call BigWig.wigToBigWigConversion as BigWig {
   input:
+    sample_basename = sample_basename,
     ref_fasta_index = reference_fai,
     baf_wig = calculateBAF.output_BAF,
     roh_calls_qual_wig = CallROH.ROH_calls_qual,
@@ -931,7 +932,8 @@ workflow FastqToVCF {
 
     File? expansion_hunter_vcf_annotated = ExpansionHunter.expansion_hunter_vcf_annotated
     
-    Array[File] bigWig_files = BigWig.bigWig_files
+    ## Array[File] bigWig_files = BigWig.bigWig_files
+    File? bigWig_tar_file = BigWig.bigWig_tar_file
   }
 }
 
