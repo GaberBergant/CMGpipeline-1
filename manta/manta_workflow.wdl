@@ -152,6 +152,7 @@ task MergeMantaFiles {
     cpu: 2
     runtime_minutes: 120
     docker_user: "root"
+    continueOnReturnCode: true
   }
   output {
     File merged_vcf = "merged.vcf"
@@ -181,6 +182,7 @@ task AnnotateMantaVCF {
     requested_memory_mb_per_core: 2000
     cpu: 8
     runtime_minutes: 120
+    continueOnReturnCode: true
   }
   output {
     File output_sv_table = "~{sample_basename}.mantaSVs.txt"
