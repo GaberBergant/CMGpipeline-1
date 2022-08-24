@@ -96,10 +96,10 @@ workflow SVcalling {
     }
 
     output {
-        File? mantaVcf = manta.mantaVCF
-        File? mantaVcfindex = manta.mantaVCFindex
-        File? output_sv_table = AnnotateMantaVCF.output_sv_table
-        File? output_manta_filtered_vcf = AnnotateMantaVCF.output_manta_filtered_vcf
+        File mantaVcf = manta.mantaVCF
+        File mantaVcfindex = manta.mantaVCFindex
+        File output_sv_table = AnnotateMantaVCF.output_sv_table
+        File output_manta_filtered_vcf = AnnotateMantaVCF.output_manta_filtered_vcf
         File? annotSV_tsv = annotSV.sv_variants_tsv
     }
 
@@ -155,7 +155,7 @@ task MergeMantaFiles {
     continueOnReturnCode: true
   }
   output {
-    File? merged_vcf = "merged.vcf"
+    File merged_vcf = "merged.vcf"
   }
 }
 
@@ -185,9 +185,9 @@ task AnnotateMantaVCF {
     continueOnReturnCode: true
   }
   output {
-    File? output_sv_table = "~{sample_basename}.mantaSVs.txt"
-    File? output_manta_filtered_vcf = "~{sample_basename}.merged.filtered.vcf"
-    File? output_manta_annotated_filtered_vcf = "~{sample_basename}.merged.annotated.filtered.vcf"
+    File output_sv_table = "~{sample_basename}.mantaSVs.txt"
+    File output_manta_filtered_vcf = "~{sample_basename}.merged.filtered.vcf"
+    File output_manta_annotated_filtered_vcf = "~{sample_basename}.merged.annotated.filtered.vcf"
   }
 }
 
