@@ -1,0 +1,8 @@
+{
+  "SoftSearchWF.input_bam": "/mnt/dataSeq/DATA_REPOSITORY/BAMS_HG19/PX09999.marked.bam",
+  "SoftSearchWF.input_bam_index": "/mnt/dataSeq/DATA_REPOSITORY/BAMS_HG19/PX09999.marked.bai",
+  "SoftSearchWF.reference_fa": "/mnt/dataSeq/CROMWELL/FastqToVCFPipelineDatasets/hg19/hg19.fa",
+  "SoftSearchWF.reference_fai": "/mnt/dataSeq/CROMWELL/FastqToVCFPipelineDatasets/hg19/hg19.fa.fai",
+  "SoftSearchWF.scatter_regions": ["chr20","chr21"],
+  "SoftSearchWF.sample_basename": "PX09999"
+}
