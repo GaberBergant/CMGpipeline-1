@@ -65,11 +65,18 @@ task SoftSearch {
     # Generate the genome file
     awk -v OFS='\t' {'print $1,$2'} ~{ref_fasta_index} > hg19.genome
 
-    # Perform SoftSearch
-    perl /softsearch/script/SoftSearch.pl -b ~{input_bam} -o ~{sample_basename}.softSearch.vcf -f ~{ref_fasta} -v -blacklist /softsearch/library/blacklist_fixed.bed -genome hg19.genome -c ~{chromosome}
+    # Get population masked regions from the softsearch repository
+    wget https://raw.githubusercontent.com/AlesMaver/CMGpipeline/svcalling/softsearch/breakpoint_mask.bed
+    # Re-attempt the wget without the https_proxy set
+    unset https_proxy 
+    wget https://raw.githubusercontent.com/AlesMaver/CMGpipeline/svcalling/softsearch/breakpoint_mask.bed
 
-    #bcftools view -Oz ~{sample_basename}.softSearch.vcf > ~{sample_basename}.softSearch.vcf.gz
-    #bcftools index -t ~{sample_basename}.softSearch.vcf.gz
+    # Merge population and softsearch masks
+    cat breakpoint_mask.bed /softsearch/library/blacklist_fixed.bed | sort -k1,1 -k2,2n | bedtools merge -i stdin > blacklist.bed
+
+    # Perform SoftSearch
+    perl /softsearch/script/SoftSearch.pl -b ~{input_bam} -o ~{sample_basename}.softSearch.vcf -f ~{ref_fasta} -v -blacklist blacklist.bed -genome hg19.genome -c ~{chromosome}
+
   >>>
 
   runtime {
