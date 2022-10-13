@@ -20,6 +20,7 @@ import "./optimised_optitypeDNA" as Optitype
 import "./SMN_caller/SMN_caller.wdl" as SMN
 import "./bigWig/wigToBigWig_conversion" as BigWig
 import "https://raw.githubusercontent.com/AlesMaver/gatk/master/scripts/mutect2_wdl/mutect2.wdl" as Mutect2
+import "https://raw.githubusercontent.com/AlesMaver/structural-variantcalling/develop/structural-variantcalling.wdl" as SVcalling
 
 # WORKFLOW DEFINITION 
 workflow FastqToVCF {
@@ -669,6 +670,32 @@ workflow FastqToVCF {
     input:
       bedtools_annotated_file = CONIFER_Annotate.conifer_bedtools
     }     
+  }
+
+  BwaIndex bwaIndex = object {
+      fastaFile: reference_fa,
+      indexFiles: [
+        reference_fixed_sa,
+        reference_fixed_amb,
+        reference_fixed_ann,
+        reference_fixed_bwt,
+        reference_fixed_pac,
+        reference_fixed_fai
+    ]
+  }
+
+  call SVcalling.SVcalling {
+    input:
+      bamFile = SortSam.output_bam,
+      bamIndex = SortSam.output_bam_index,
+
+      referenceFasta=reference_fa,
+      referenceFastaFai=reference_fai,
+      referenceFastaDict=reference_dict,  
+
+      sample = sample_basename, 
+
+      bwaIndex = bwaIndex
   }
 
   if( defined(input_manta_reference_vcfs) && !defined(targetRegions) ){
