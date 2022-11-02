@@ -198,7 +198,8 @@ task annotSV {
 
   runtime {
     requested_memory_mb_per_core: 8000
-    docker: "mgibio/annotsv-cwl:2.1"
+    #docker: "mgibio/annotsv-cwl:2.1" # Disabling the old image and trying the 3.1 image due to inclusion of cytobands in the annotation
+    docker: "alesmaver/annotsv"
     continueOnReturnCode: true
     cpu: 1
   }

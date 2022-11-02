@@ -2,48 +2,42 @@ version 1.0
 
 workflow DELLY {
   input {
-    Array[File] input_bams
-    Array[File] input_bais
-
+    File input_bam
+    File input_bai
+    File population_bcf
+    File population_bcf_index
     File reference_fasta
   }
 
-  Array[Pair[File,File]] bam_bai_pairs = zip(input_bams, input_bais)
-
-  scatter (bam_bai_pair in bam_bai_pairs) {
-        File input_bam = bam_bai_pair.left
-        File input_bai = bam_bai_pair.right
-
-        call DELLY_call {
-            input:
-                input_bam = input_bam,
-                input_bai = input_bai,
-                reference_fasta = reference_fasta
-        }
+  call DELLY_call {
+      input:
+          input_bam = input_bam,
+          input_bai = input_bai,
+          reference_fasta = reference_fasta
   }
+
+  Array[File] input_bcfs = [DELLY_call.bcf_file, population_bcf]
 
   call DELLY_merge {
     input:
-        input_bcfs = DELLY_call.bcf_file
+        input_bcfs = input_bcfs
   }
 
-  scatter (bam_bai_pair in bam_bai_pairs) {
-        File input_bam2 = bam_bai_pair.left
-        File input_bai2 = bam_bai_pair.right
-
-        call DELLY_genotype {
-            input:
-                input_bam = input_bam2,
-                input_bai = input_bai2,
-                reference_fasta = reference_fasta,
-                sites_bcf_file = DELLY_merge.sites_bcf_file
-        }
+  call DELLY_genotype {
+      input:
+          input_bam = input_bam,
+          input_bai = input_bai,
+          reference_fasta = reference_fasta,
+          sites_bcf_file = DELLY_merge.sites_bcf_file
   }
+
+  Array[File] input_geno_bcfs = [DELLY_genotype.geno_bcf_file, population_bcf]
+  Array[File] input_geno_bcf_indices = [DELLY_genotype.geno_bcf_index_file, population_bcf_index]
 
   call DELLY_merge_genotype {
     input:
-        input_geno_bcfs = DELLY_genotype.geno_bcf_file,
-        input_geno_bcf_indices = DELLY_genotype.geno_bcf_index_file
+        input_geno_bcfs = input_geno_bcfs,
+        input_geno_bcf_indices = input_geno_bcf_indices
   }
 
 call DELLY_filter {
@@ -52,7 +46,10 @@ call DELLY_filter {
 }
 
   output {
-    File? delly_bcf = DELLY_filter.filtered_bcf
+    #File sample_bcfs = DELLY_genotype.geno_bcf_file
+    #File sample_bcf_indices = DELLY_genotype.geno_bcf_index_file
+    File unfiltered_population_bcf = DELLY_merge_genotype.merged_geno_file
+    File filtered_population_bcf = DELLY_filter.filtered_bcf
   }
 }
 
@@ -158,7 +155,7 @@ task DELLY_filter {
 
   command {
     bcftools index ~{input_bcf}
-    delly filter -f germline -o germline.bcf ~{input_bcf}
+    delly filter -f germline -o population.bcf ~{input_bcf}
     bcftools view -Ov -o germline.vcf germline.bcf
   }
 
@@ -169,6 +166,6 @@ task DELLY_filter {
     runtime_minutes: 200
   }
   output {
-    File filtered_bcf = "merged.bcf" 
+    File filtered_bcf = "population.bcf" 
   }
 }   
