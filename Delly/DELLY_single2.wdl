@@ -82,7 +82,7 @@ task DELLY_call {
   }
 
   runtime {
-    docker: "alesmaver/delly"
+    docker: "alesmaver/delly2"
     requested_memory_mb_per_core: 4000
     cpu: 2
     runtime_minutes: 200
@@ -102,7 +102,7 @@ task DELLY_merge {
   }
 
   runtime {
-    docker: "alesmaver/delly"
+    docker: "alesmaver/delly2"
     requested_memory_mb_per_core: 4000
     cpu: 2
     runtime_minutes: 200
@@ -128,7 +128,7 @@ task DELLY_genotype {
   }
 
   runtime {
-    docker: "alesmaver/delly"
+    docker: "alesmaver/delly2"
     requested_memory_mb_per_core: 4000
     cpu: 2
     runtime_minutes: 200
@@ -185,7 +185,7 @@ task DELLY_filter {
   }
 
   runtime {
-    docker: "alesmaver/delly"
+    docker: "alesmaver/delly2"
     requested_memory_mb_per_core: 4000
     cpu: 2
     runtime_minutes: 200

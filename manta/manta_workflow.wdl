@@ -209,7 +209,7 @@ task annotSV {
   }
 
   command <<<
-    /opt/AnnotSV_2.1/bin/AnnotSV -bedtools /usr/bin/bedtools -outputDir "$PWD" \
+    /opt/AnnotSV_3.1/bin/AnnotSV -bedtools /usr/bin/bedtools -outputDir "$PWD" \
     -genomeBuild ~{genome_build} \
     -SVinputFile ~{input_vcf} \
     -outputFile ~{output_tsv_name}
