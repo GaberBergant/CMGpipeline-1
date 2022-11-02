@@ -199,6 +199,10 @@ task annotSV {
   runtime {
     requested_memory_mb_per_core: 8000
     #docker: "mgibio/annotsv-cwl:2.1" # Disabling the old image and trying the 3.1 image due to inclusion of cytobands in the annotation
+    # The image was created by:
+    # 1. Pulling trinhanne/annotsv:3.1 image
+    # 2. cd-ing into the /opt/AnnotSV_3.1 directory
+    # 3. Running the make PREFIX=. install-human-annotation
     docker: "alesmaver/annotsv"
     continueOnReturnCode: true
     cpu: 1
