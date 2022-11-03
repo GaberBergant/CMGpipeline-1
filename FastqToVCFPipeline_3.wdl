@@ -929,6 +929,12 @@ workflow FastqToVCF {
     File? mantaVCFindex = Manta.mantaVcfindex
     File? mantaSVs = Manta.output_sv_table
     File? mantaSVs_annotSV_tsv = Manta.annotSV_tsv
+    
+    # Delly
+    File? sample_bcfs = Delly.sample_bcfs
+    File? sample_bcf_indices = Delly.sample_bcf_indices
+    #File? unfiltered_population_bcf = Delly.sample_bcf_indices
+    File? filtered_population_bcf = Delly.filtered_population_bcf
 
     File? Qualimap_results = Qualimap.results
     File? QualimapWGS_results = QualimapWGS.results
