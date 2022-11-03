@@ -16,6 +16,7 @@ import "./CreateInterpretationTable.wdl" as CreateInterpretationTable
 import "./MitoMap.wdl" as MitoMap
 import "./exp_hunter.wdl" as ExpansionHunter
 import "./manta/manta_workflow.wdl" as Manta
+import "https://raw.githubusercontent.com/AlesMaver/CMGpipeline/master/Delly/DELLY_single3.wdl" as Delly
 import "./optimised_optitypeDNA" as Optitype
 import "./SMN_caller/SMN_caller.wdl" as SMN
 import "./bigWig/wigToBigWig_conversion" as BigWig
@@ -122,6 +123,10 @@ workflow FastqToVCF {
     # Manta
     Array[File]? input_manta_reference_vcfs
     Boolean exome = false
+    
+    # DELLY
+    File? population_bcf
+    File? population_bcf_index
 
     ## Boolean GenerateCRAM = false
     Boolean? GenerateCRAM
@@ -707,6 +712,20 @@ workflow FastqToVCF {
         
         output_filename = sample_basename + ".manta.annotated.vcf.gz",
         docker = "dceoy/bcftools"
+    }
+  }
+
+  # DELLY
+  if ( defined(enrichment) ){
+    if( enrichment=="WGS1Mb" ){
+       call Delly.DELLY as Delly {
+        input:
+	  input_bam = SortSam.output_bam,
+          input_bai = SortSam.output_bam_index,
+          population_bcf = population_bcf,
+          population_bcf_index = population_bcf_index,
+          reference_fasta = reference_fa
+      }
     }
   }
 
