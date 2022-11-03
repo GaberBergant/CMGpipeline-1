@@ -125,8 +125,8 @@ workflow FastqToVCF {
     Boolean exome = false
     
     # DELLY
-    File? population_bcf
-    File? population_bcf_index
+    File population_bcf
+    File population_bcf_index
 
     ## Boolean GenerateCRAM = false
     Boolean? GenerateCRAM
