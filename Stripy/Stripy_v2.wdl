@@ -23,7 +23,7 @@ workflow stripy_workflow {
             loci = extract_loci.loci_string,
             genome = reference_genome_name,
             sex = sex,
-            bam_file = bam_file
+            input_file = bam_file
     }
 }
 
