@@ -81,4 +81,10 @@ task run_stripy {
         cpu: 4
         runtime_minutes: 30
     }
+
+    #output {
+    #    File a = "~{sample_basename}.CONIFER_CALLS.txt"
+    #    File b = "~{sample_basename}.CNV.wig"
+    #    File c = "~{sample_basename}.CNV.annotSV.input.bed"
+    #}
 }
