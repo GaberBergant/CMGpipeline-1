@@ -3,10 +3,10 @@ version 1.0
 workflow stripy_workflow {
     input {
         String sample_id
-        File? bam_file
-        File? bai_file
+        File bam_file
+        File bai_file
         File reference_fasta
-        File? reference_fasta_index
+        File reference_fasta_index
 
         String sex
         # male / female (case sensitive)
@@ -21,10 +21,10 @@ workflow stripy_workflow {
 
     call run_stripy {
         input:
+            sample_id = sample_id,
             reference_fasta = reference_fasta,
-            output = output_directory,
             loci = extract_loci.loci_string,
-            genome = reference_fasta_name,
+            reference_genome_name = reference_genome_name,
             sex = sex,
             bam_file = bam_file
     }
@@ -52,10 +52,10 @@ task extract_loci {
 
 task run_stripy {
     input {
-        File reference
-        String output
+        String sample_id
+        File reference_fasta
         String loci
-        String genome
+        String reference_genome_name
         String sex
         File bam_file
     }
@@ -63,20 +63,15 @@ task run_stripy {
     command <<<
         set -e
 
-        # Path to required files for docker volumes
-        ref_dir=$(dirname "${reference_fasta}")
-        input_dir=$(dirname "${input_path}")
-
-        # Filenames
-        ref_file=$(basename "${reference_path}")
-        input_file=$(basename "${input_path}")
-
         # Constructing Docker run command (inside Docker already)
-        ./batch.sh -o /mnt/results -r /mnt/ref/${ref_file} -l ${loci} -g ${genome} -s ${sex} -i /mnt/data/${input_file}
+        ./batch.sh -o ./ -r ${reference} -l ${loci} -g ${reference_genome_name} -s ${sex} -i ${bam_file}
     >>>
+
+     output {
+        File stripy_html = "~{sample_id}.hg19.cram.html"
+    }
 
     runtime {
         docker: "stripy:v2.2"
-        volumes: ["${ref_dir}:/mnt/ref", "${output_path}:/mnt/results", "${input_dir}:/mnt/data"]
     }
 }
