@@ -2,37 +2,45 @@ version 1.0
 
 workflow stripy_workflow {
     input {
-        File input_bam
-        File reference_genome
-        File variant_catalog_json
+        String sample_id
+        File? bam_file
+        File? bai_file
+        File? cram_file
+        File? crai_file
+        File reference_fasta
+        File? reference_fasta_index
+
         String sex
+        # male / female (case sensitive)
+
         String output_directory
         String reference_genome_name = "hg19"
     }
 
     call extract_loci {
-        input:
-            variant_catalog = variant_catalog_json
+
     }
 
     call run_stripy {
         input:
-            reference = reference_genome,
+            reference_fasta = reference_fasta,
             output = output_directory,
             loci = extract_loci.loci_string,
-            genome = reference_genome_name,
+            genome = reference_fasta_name,
             sex = sex,
-            input_bam = input_bam
+            bam_file = bam_file
     }
 }
 
 task extract_loci {
-    input {
-        File variant_catalog
-    }
 
     command {
-        jq -r '[.[] | .LocusId] | join(",")' ${variant_catalog}
+        echo "[ PREPARATION ] Downloading variant catalog JSON"
+        wget "https://raw.githubusercontent.com/AlesMaver/CMGpipeline/master/ExpansionHunter_configuration/variant_catalog.json"
+        unset https_proxy
+        wget "https://raw.githubusercontent.com/AlesMaver/CMGpipeline/master/ExpansionHunter_configuration/variant_catalog.json"
+
+        jq -r '[.[] | .LocusId] | join(",")' ./variant_catalog.json
     }
 
     output {
@@ -51,18 +59,14 @@ task run_stripy {
         String loci
         String genome
         String sex
-        File input_bam
+        File bam_file
     }
 
     command <<<
         set -e
-        # Resolve paths
-        reference_path=$(realpath ${reference})
-        output_path=$(realpath ${output})
-        input_path=$(realpath ${input_bam})
 
         # Path to required files for docker volumes
-        ref_dir=$(dirname "${reference_path}")
+        ref_dir=$(dirname "${reference_fasta}")
         input_dir=$(dirname "${input_path}")
 
         # Filenames
