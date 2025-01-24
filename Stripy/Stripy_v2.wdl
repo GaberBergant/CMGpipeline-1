@@ -44,6 +44,9 @@ task extract_loci {
 
     runtime {
         docker: "stedolan/jq"
+        requested_memory_mb_per_core: 1000
+        cpu: 1
+        runtime_minutes: 10
     }
 }
 
@@ -74,6 +77,8 @@ task run_stripy {
 
     runtime {
         docker: "stripy:v2.2"
-        volumes: ["${ref_dir}:/mnt/ref", "${output_path}:/mnt/results", "${input_dir}:/mnt/data"]
+        requested_memory_mb_per_core: 1000
+        cpu: 4
+        runtime_minutes: 30
     }
 }
