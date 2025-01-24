@@ -6,12 +6,9 @@ workflow stripy_workflow {
         File? bam_file
         File? bai_file
         File reference_fasta
-        File? reference_fasta_index
-
+        #File? reference_fasta_index
+        # sex: male / female (case sensitive)
         String sex
-        # male / female (case sensitive)
-
-        String output_directory
         String reference_genome_name = "hg19"
     }
 
@@ -21,10 +18,10 @@ workflow stripy_workflow {
 
     call run_stripy {
         input:
-            reference_fasta = reference_fasta,
+            reference = reference_fasta,
             output = output_directory,
             loci = extract_loci.loci_string,
-            genome = reference_fasta_name,
+            genome = reference_genome_name,
             sex = sex,
             bam_file = bam_file
     }
