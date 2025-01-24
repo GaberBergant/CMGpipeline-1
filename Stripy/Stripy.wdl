@@ -5,8 +5,6 @@ workflow stripy_workflow {
         String sample_id
         File? bam_file
         File? bai_file
-        File? cram_file
-        File? crai_file
         File reference_fasta
         File? reference_fasta_index
 
