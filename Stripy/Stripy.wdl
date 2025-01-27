@@ -3,14 +3,12 @@ version 1.0
 workflow stripy_workflow {
     input {
         String sample_id
-        File? bam_file
+        File bam_file
         File? bai_file
         File reference_fasta
         File? reference_fasta_index
 
-        String sex
-        # male / female (case sensitive)
-
+        String? sex  # Optional sex input, defaulting and validation happens in the task input
         String output_directory
         String reference_genome_name = "hg19"
     }
@@ -22,10 +20,10 @@ workflow stripy_workflow {
     call run_stripy {
         input:
             reference_fasta = reference_fasta,
-            output = output_directory,
+            output_directory = output_directory,
             loci = extract_loci.loci_string,
-            genome = reference_fasta_name,
-            sex = sex,
+            genome = reference_genome_name,
+            sex = if defined(sex) && (sex == "male" || sex == "female") then sex else "male",
             bam_file = bam_file
     }
 }
@@ -45,15 +43,12 @@ task extract_loci {
         String loci_string = read_string(stdout())
     }
 
-    runtime {
-        docker: "stedolan/jq"
-    }
 }
 
 task run_stripy {
     input {
-        File reference
-        String output
+        File reference_fasta
+        String output_directory
         String loci
         String genome
         String sex
@@ -61,22 +56,13 @@ task run_stripy {
     }
 
     command <<<
-        set -e
-
-        # Path to required files for docker volumes
-        ref_dir=$(dirname "${reference_fasta}")
-        input_dir=$(dirname "${input_path}")
-
-        # Filenames
-        ref_file=$(basename "${reference_path}")
-        input_file=$(basename "${input_path}")
+        set -e     
 
         # Constructing Docker run command (inside Docker already)
-        ./batch.sh -o /mnt/results -r /mnt/ref/${ref_file} -l ${loci} -g ${genome} -s ${sex} -i /mnt/data/${input_file}
+        ./batch.sh -o ${output_directory} -r ${reference_fasta} -l ${loci} -g ${genome} -s ${sex} -i ${bam_file}
     >>>
 
     runtime {
-        docker: "stripy:v2.2"
-        volumes: ["${ref_dir}:/mnt/ref", "${output_path}:/mnt/results", "${input_dir}:/mnt/data"]
+        docker: "gbergant/stripy_prod:2.2"
     }
 }
